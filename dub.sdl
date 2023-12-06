@@ -1,0 +1,9 @@
+// DMD v2.105.3
+name "tiny-grad"
+description "A tiny autograd library."
+authors "rillki"
+copyright "Copyright © 2023, rillki"
+license "BSL-1.0"
+targetPath "bin"
+
+
