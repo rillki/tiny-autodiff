@@ -5,8 +5,13 @@ import rk.tgrad;
 
 void main()
 {
-    auto a = Value!float(1.2);
+    auto a = value(-4);
+    auto b = value(2);
+    auto c = a + b;
+    a.backward();
     a.writeln;
+    b.writeln;
+    c.writeln;
 }
 
 
