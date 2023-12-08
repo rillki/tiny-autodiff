@@ -1,8 +1,26 @@
 module rk.tgrad.value;
 
-import std.traits : isFloatingPoint;
+import std.traits : isFloatingPoint, isNumeric;
 
-class Value(T = float) if (isFloatingPoint!T)
+template value(T = float) if (isFloatingPoint!T)
+{
+    auto value(S)(in S data) if (isNumeric!S)
+    {
+        return new Value!(T, S)(data);
+    }
+
+    auto value(S)(in S data, Value!(T, S)[] children) if (isNumeric!S)
+    {
+        return new Value!(T, S)(data, children);
+    }
+
+    auto value(S)(in S data, void delegate() _backward) if (isNumeric!S)
+    {
+        return new Value!(T, S)(data, _backward);
+    }
+}
+
+class Value(T = float, S) if (isFloatingPoint!T && isNumeric!S)
 {
     T data;
     T grad;
@@ -24,6 +42,12 @@ class Value(T = float) if (isFloatingPoint!T)
         this.children = children;
     }
 
+    this(in T data, void delegate() _backward) 
+    {
+        this(data);
+        this._backward = _backward;
+    }
+
     void backward() {
         this.grad = 1;
         foreach (node; buildNodeList(this)) node._backward();
@@ -36,7 +60,7 @@ class Value(T = float) if (isFloatingPoint!T)
     /// for Value type
     typeof(this) opBinary(string op)(ref typeof(this) rhs) 
     {
-        auto result = new Value!T(mixin("this.data" ~ op ~ "rhs.data"), [this, rhs]);
+        auto result = new typeof(this)(mixin("this.data" ~ op ~ "rhs.data"), [this, rhs]);
         result._backward = () 
         {
             static if (op == "+" || op == "-") 
@@ -54,11 +78,11 @@ class Value(T = float) if (isFloatingPoint!T)
         return result;
     }
 
-    /// for numerical values
+    // /// for numerical values
     typeof(this) opBinary(string op)(in T rhs)
     {
-        auto rhs_value = new Value!T(rhs);
-        auto result = new Value!T(mixin("this.data" ~ op ~ "rhs_value.data"), [this, rhs_value]);
+        auto rhs_value = new typeof(this)(rhs);
+        auto result = new typeof(this)(mixin("this.data" ~ op ~ "rhs_value.data"), [this, rhs_value]);
         result._backward = () 
         {
             static if (op == "+" || op == "-") 
@@ -99,7 +123,4 @@ class Value(T = float) if (isFloatingPoint!T)
         return nodeList;
     }
 }
-
-
-
 

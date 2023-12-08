@@ -4,11 +4,11 @@ import std.stdio;
 import rk.tgrad;
 
 void main()
-{
-    auto a = new Value!float(3);
-    auto b = new Value!float(-2);
-    auto d = new Value!float(12);
-    auto c = a * b;
+{   
+    auto a = value(3);
+    auto b = value(-2);
+    auto c = value(12);
+    auto d = a * b;
     auto e = c + d;
     auto f = e * e;
     auto g = f / 2;
