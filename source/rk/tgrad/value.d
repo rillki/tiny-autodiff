@@ -25,33 +25,15 @@ class Value(T = float) if (isFloatingPoint!T)
     }
 
     void backward() {
-        import std.algorithm : canFind;
-
-        // build topo list
-        typeof(this)[] topoList;
-        buildTopoList(this, topoList);
-
-        // perform backward propagation
         this.grad = 1;
-        foreach (child; topoList)
-        {   
-            child._backward();
-        }
+        foreach (node; buildNodeList(this)) node._backward();
     }
 
     void resetGrads() {
-        // build topo list
-        typeof(this)[] topoList;
-        buildTopoList(this, topoList);
-
-        // reset grads
-        foreach (child; topoList)
-        {
-            child.grad = 0;
-        }
+        foreach (node; buildNodeList(this)) node.grad = 0;
     }
 
-    /// for Value 
+    /// for Value type
     typeof(this) opBinary(string op)(ref typeof(this) rhs) 
     {
         auto result = new Value!T(mixin("this.data" ~ op ~ "rhs.data"), [this, rhs]);
@@ -94,15 +76,27 @@ class Value(T = float) if (isFloatingPoint!T)
         return result;
     }
 
-    private void buildTopoList(typeof(this) visitor, ref typeof(this)[] topoList) 
+    private auto buildNodeList(typeof(this) startNode)
     {
         import std.algorithm : canFind;
 
-        if (!topoList.canFind(visitor)) topoList ~= visitor;
-        foreach (v; visitor.children)
-        {   
-            buildTopoList(v, topoList);
+        // define a list where to save all nodes
+        typeof(this)[] nodeList = [];
+
+        // define deep walk funtion to traverse each node and add to list
+        void deepWalk(typeof(this) node)
+        {
+            // add to node list
+            if (!nodeList.canFind(node)) nodeList ~= node;
+
+            // traverse each child iteratively
+            foreach (child; node.children) deepWalk(child);
         }
+
+        // traverse node tree
+        deepWalk(startNode);
+
+        return nodeList;
     }
 }
 
