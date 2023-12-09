@@ -6,21 +6,21 @@ template value(T = float) if (isFloatingPoint!T)
 {
     auto value(S)(in S data) if (isNumeric!S)
     {
-        return new Value!(T, S)(data);
+        return new Value!(T)(data);
     }
 
-    auto value(S)(in S data, Value!(T, S)[] children) if (isNumeric!S)
+    auto value(S)(in S data, Value!(T)[] children) if (isNumeric!S)
     {
-        return new Value!(T, S)(data, children);
+        return new Value!(T)(data, children);
     }
 
     auto value(S)(in S data, void delegate() _backward) if (isNumeric!S)
     {
-        return new Value!(T, S)(data, _backward);
+        return new Value!(T)(data, _backward);
     }
 }
 
-class Value(T = float, S) if (isFloatingPoint!T && isNumeric!S)
+class Value(T = float) if (isFloatingPoint!T)
 {
     T data;
     T grad;
@@ -122,5 +122,44 @@ class Value(T = float, S) if (isFloatingPoint!T && isNumeric!S)
 
         return nodeList;
     }
+}
+
+unittest
+{
+    import std.array : empty;
+
+    auto a = value(3);
+    auto b = value(-2);
+    auto c = value(12);
+    auto d = a * b;
+    auto e = c + d;
+
+    e.backward();
+    
+    assert(a.data == 3);
+    assert(a.grad == -2);
+    assert(a.children.empty);
+
+    assert(b.data == -2);
+    assert(b.grad == 3);
+    assert(b.children.empty);
+
+    assert(c.data == 12);
+    assert(c.grad == 1);
+    assert(c.children.empty);
+
+    assert(d.data == -6);
+    assert(d.grad == 1);
+    assert(d.children == [a, b]);
+
+    assert(e.data == 6);
+    assert(e.grad == 1);
+    assert(e.children == [c, d]);
+
+    e.resetGrads();
+    assert(a.grad == 0);
+
+    e.backward();
+    assert(a.grad == -2);
 }
 
