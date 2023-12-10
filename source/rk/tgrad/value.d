@@ -56,6 +56,8 @@ class Value(T = float) if (isFloatingPoint!T)
     void resetGrads() {
         foreach (node; buildNodeList(this)) node.grad = 0;
     }
+    
+    /+ ---------- OPERATOR OVERLOADING ---------- +/
 
     /// for Value type
     typeof(this) opBinary(string op)(ref typeof(this) rhs) 
@@ -78,7 +80,7 @@ class Value(T = float) if (isFloatingPoint!T)
         return result;
     }
 
-    // /// for numerical values
+    /// for numerical values
     typeof(this) opBinary(string op)(in T rhs)
     {
         auto rhs_value = new typeof(this)(rhs);
@@ -98,6 +100,11 @@ class Value(T = float) if (isFloatingPoint!T)
             else static assert(0, "Operator <"~op~"> not supported!");
         };
         return result;
+    }
+
+    typeof(this) opUnary(string op)() if (op == "-")
+    {
+        return this * -1;
     }
 
     private auto buildNodeList(typeof(this) startNode)
