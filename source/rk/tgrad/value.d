@@ -2,7 +2,7 @@ module rk.tgrad.value;
 
 import std.traits : isFloatingPoint, isNumeric;
 
-template value(T = float) if (isFloatingPoint!T)
+template value(T = float)
 {
     auto value(S)(in S data) if (isNumeric!S)
     {
@@ -53,14 +53,14 @@ class Value(T = float) if (isFloatingPoint!T)
         foreach (node; buildNodeList(this)) node._backward();
     }
 
-    void resetGrads() {
+    void zeroGrad() {
         foreach (node; buildNodeList(this)) node.grad = 0;
     }
     
     /+ ---------- OPERATOR OVERLOADING ---------- +/
 
     /// for Value type
-    typeof(this) opBinary(string op)(ref typeof(this) rhs) 
+    auto opBinary(string op)(ref typeof(this) rhs) 
     {
         auto result = new typeof(this)(mixin("this.data" ~ op ~ "rhs.data"), [this, rhs]);
         result._backward = () 
@@ -81,7 +81,7 @@ class Value(T = float) if (isFloatingPoint!T)
     }
 
     /// for numerical values
-    typeof(this) opBinary(string op)(in T rhs)
+    auto opBinary(string op)(in T rhs)
     {
         auto rhs_value = new typeof(this)(rhs);
         auto result = new typeof(this)(mixin("this.data" ~ op ~ "rhs_value.data"), [this, rhs_value]);
@@ -102,7 +102,7 @@ class Value(T = float) if (isFloatingPoint!T)
         return result;
     }
 
-    typeof(this) opUnary(string op)() if (op == "-")
+    auto opUnary(string op)() if (op == "-")
     {
         return this * -1;
     }
@@ -163,7 +163,7 @@ unittest
     assert(e.grad == 1);
     assert(e.children == [c, d]);
 
-    e.resetGrads();
+    e.zeroGrad();
     assert(a.grad == 0);
 
     e.backward();

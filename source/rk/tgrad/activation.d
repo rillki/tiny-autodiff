@@ -5,7 +5,7 @@ import rk.tgrad.value;
 import std.math : exp, tanh;
 import std.algorithm : min, max;
 
-auto activateSigmoid(T)(Value!T x) 
+auto activateSigmoid(T)(Value!T x)
 {
     auto result = value(1 / (1 + exp(-x)), [x]);
     result._backward = () 
