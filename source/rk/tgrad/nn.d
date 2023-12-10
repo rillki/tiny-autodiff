@@ -6,7 +6,7 @@ import std.traits : isFloatingPoint;
 
 template neuron(size_t inSize, T = float)
 {
-    auto neuron(void function(Value!T) activate = (v) { v = activateRelu(v); })
+    auto neuron(Value!(T) function(Value!T) activate = (x) { return activateRelu(x); })
     {
         import std.random : uniform;
 
@@ -38,16 +38,15 @@ template neuron(size_t inSize, T = float)
 interface INeuron
 {
     void zeroGrad();
-    S parameters(S)();
 }
 
 class Neuron(T = float, size_t inSize) if (isFloatingPoint!T) : INeuron
 {
     Value!(T) bias;
     Value!(T)[inSize] weights;
-    void delegate(ref Value!T) activate;
+    Value!(T) function(ref Value!T) activate;
 
-    this(Value!(T) bias, Value!(T)[inSize] weights, void delegate(ref Value!T) activate)
+    this(Value!(T) bias, Value!(T)[inSize] weights, Value!(T) function(ref Value!T) activate)
     {
         this.bias = bias;
         this.weights = weights;
@@ -73,9 +72,9 @@ class Neuron(T = float, size_t inSize) if (isFloatingPoint!T) : INeuron
         }
     }
 
-    S parameters(S)() 
+    auto parameters() 
     {
-        return [w, b];
+        return weights ~ bias;
     }
 }
 
@@ -86,7 +85,10 @@ class Neuron(T = float, size_t inSize) if (isFloatingPoint!T) : INeuron
 
 unittest
 {
-    auto n = neuron!(3)(activateRelu);
-    // auto n = new Neuron!(float, 1)(value(0.0), [value(0)], (x){});
+    // auto n = neuron!(3)();
+    auto n = new Neuron!(float, 1)(value(0.0), [value(2)], (x){ return activateRelu(x); });
+    auto r = n([value(2)]);
+    import std.stdio; r.writeln; writeln(n.parameters());
+    r.grad.writeln;
 }
 
