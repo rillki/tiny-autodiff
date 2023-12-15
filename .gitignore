@@ -3,6 +3,7 @@
 lib/
 bin/
 __internal/
+archive/
 
 # Compiled Object files
 *.o

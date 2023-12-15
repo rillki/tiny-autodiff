@@ -1,10 +1,16 @@
 module app;
 
-import rk.tgrad;
 import std.stdio;
+import rk.tgrad;
 
 void main()
 {   
-    writeln("Check out unittests.");    
+    auto neuron = new Neuron(3);
+    writeln("hello");
+
+    foreach(p; neuron.params) {
+        writeln(p.data);
+    }
+    writeln("hello");
 }
 

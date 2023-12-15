@@ -5,5 +5,5 @@ authors "rillki"
 copyright "Copyright © 2023, rillki"
 license "BSL-1.0"
 targetPath "bin"
-
+versions "TGRAD_USE_FLOAT"
 
