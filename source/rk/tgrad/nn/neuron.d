@@ -2,29 +2,51 @@ module rk.tgrad.nn.neuron;
 
 import rk.tgrad.core.common;
 import rk.tgrad.core.value;
+import rk.tgrad.aux.activation;
 
-class Neuron
+class Neuron : INeuron
 {
     import std.parallelism : parallel;
 
     Value[] params;
     Value function(Value) activate;
 
-    this(in size_t inputSize, Value function(Value) activate = (x){return x;}) {
+    this(in size_t inputSize, Value function(Value) activate = &activateLinear) {
         foreach (i; 0..inputSize+1) this.params ~= value();
         this.activate = activate;
     }
 
-    Value forward(Value[] input) in (input.length+1 == params.length)
+    Value forward(Value[] input) in (input.length+1 == parameters.length)
     {
         auto sum = value(0);
         foreach (i, x; input) sum = sum + params[i]*x;
         return activate(sum + params[$-1]);
     }
 
-    void zeroGrad()
+    void backward()
     {
-        foreach (p; params.parallel) p.grad = 0;
+        foreach (p; this.parameters) p.backward();
+    }
+
+    Value[] parameters()
+    {
+        Value[] paramsList;
+        foreach (p; this.params) paramsList ~= p.parameters;
+        return paramsList;
+    }
+
+    ElementType[] parameterValues()
+    {
+        ElementType[] paramsList;
+        foreach (p; this.params) paramsList ~= p.parameterValues;
+        return paramsList;
+    }
+
+    ElementType[] parameterGrads()
+    {
+        ElementType[] paramsList;
+        foreach (p; this.params) paramsList ~= p.parameterGrads;
+        return paramsList;
     }
 
     void update(in ElementType lr)
@@ -35,7 +57,6 @@ class Neuron
 
 unittest
 {
-    import std.stdio;
     import std.math : round;
 
     // define model
@@ -82,5 +103,9 @@ unittest
     // predict
     auto pred = neuron.forward([1.value, 1.value]);
     assert(pred.data.round == 1);
+
+    // test parameters property
+    neuron.parameters[0].grad = 2;
+    assert(neuron.params[0].grad == 2);
 }
 

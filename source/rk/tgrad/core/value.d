@@ -3,6 +3,19 @@ module rk.tgrad.core.value;
 import rk.tgrad.core.common;
 import std.traits: isNumeric;
 
+interface INeuron
+{
+    final void zeroGrad()
+    {
+        import std.parallelism : parallel;
+        foreach (ref p; parameters.parallel) p.grad = 0;
+    }
+
+    Value[] parameters();
+    ElementType[] parameterValues();
+    ElementType[] parameterGrads();
+}
+
 template value(T = ElementType) if (isNumeric!T)
 {
     auto value()
@@ -26,7 +39,7 @@ template value(T = ElementType) if (isNumeric!T)
     }
 }
 
-class Value 
+class Value : INeuron
 {
     ElementType data;
     ElementType grad = 0;
@@ -37,7 +50,7 @@ class Value
     {
         import std.random : uniform;
         this.data = uniform!("[]", ElementType, ElementType)(0, 1);
-        this.grad = uniform!("[]", ElementType, ElementType)(0, 1);
+        this.grad = 0;
     }
 
     this(in ElementType data) 
@@ -60,12 +73,22 @@ class Value
     void backward() 
     {
         this.grad = 1;
-        foreach (ref node; buildNodeList(this)) node._backward(node);
+        foreach (node; buildNodeList(this)) node._backward(node);
     }
 
-    void zeroGrad() 
+    Value[] parameters()
     {
-        foreach (ref node; buildNodeList(this)) node.grad = 0;
+        return [this];
+    }
+
+    ElementType[] parameterValues()
+    {
+        return [data];
+    }
+
+    ElementType[] parameterGrads()
+    {
+        return [grad];
     }
 
     auto opBinary(string op)(Value rhs)
@@ -236,6 +259,12 @@ unittest
 
     // zero grad
     g.zeroGrad();
+    f.zeroGrad();
+    d.zeroGrad();
+    e.zeroGrad();
+    c.zeroGrad();
+    b.zeroGrad();
+    a.zeroGrad();
     assert(g.grad == 0);
     assert(f.grad == 0);
     assert(d.grad == 0);
@@ -243,5 +272,9 @@ unittest
     assert(c.grad == 0);
     assert(b.grad == 0);
     assert(a.grad == 0);
+
+    // test parameters property
+    g.parameters[0].grad = 2;
+    assert(g.grad == 2);
 }
 
