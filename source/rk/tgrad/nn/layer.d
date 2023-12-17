@@ -64,34 +64,35 @@ unittest
     import std.stdio;
 
     // define layer
-    auto layer0 = new Layer([8, 4], &activateLinear);
-    auto layer1 = new Layer([4, 1], &activateSigmoid);
+    auto layer0 = new Layer([4, 2], &activateSigmoid);
+    auto layer1 = new Layer([2, 1], &activateSigmoid);
 
     // define data
-    auto input = [  // chocolate properties
-        [0,1,0,0,1,0,1,0].map!(x => x.value).array, // 1
-        [0,0,0,1,0,0,1,0].map!(x => x.value).array, // 1
-        [0,0,0,0,0,0,0,0].map!(x => x.value).array, // 0
-        [0,0,0,0,0,0,0,0].map!(x => x.value).array, // 0
-        [1,0,0,0,0,0,0,0].map!(x => x.value).array, // 0
-        [0,0,1,0,0,0,1,0].map!(x => x.value).array, // 1
-        [0,1,1,1,0,0,1,0].map!(x => x.value).array, // 1
-        [0,0,1,0,0,0,0,1].map!(x => x.value).array, // 0
+    auto input = [  // binary
+        [0, 0, 0, 0].map!(x => x.value).array, // 0
+        [0, 0, 0, 1].map!(x => x.value).array, // 1
+        [0, 0, 1, 0].map!(x => x.value).array, // 2
+        [0, 0, 1, 1].map!(x => x.value).array, // 3
+        [0, 1, 0, 0].map!(x => x.value).array, // 4
+        [0, 1, 0, 1].map!(x => x.value).array, // 5
+        [0, 1, 1, 0].map!(x => x.value).array, // 6
+        [0, 1, 1, 1].map!(x => x.value).array, // 7
+        [1, 0, 0, 0].map!(x => x.value).array, // 8
+        [1, 0, 0, 1].map!(x => x.value).array, // 9
+        [1, 0, 1, 0].map!(x => x.value).array, // 10
+        [1, 0, 1, 1].map!(x => x.value).array, // 11
+        [1, 1, 0, 0].map!(x => x.value).array, // 12
+        [1, 1, 0, 1].map!(x => x.value).array, // 13
+        [1, 1, 1, 0].map!(x => x.value).array, // 14
+        [1, 1, 1, 1].map!(x => x.value).array, // 15
     ];
-    auto target = [ // 1: yes, 0: no
-        1.value,
-        1.value,
-        0.value,
-        0.value,
-        0.value,
-        1.value,
-        1.value,
-        0.value,
-    ];
+    auto target = [ // 1: even, 0: odd
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0
+    ].map!(x => x.value).array;
 
     // train
     enum lr = 0.05;
-    enum epochs = 100;
+    enum epochs = 0;
     foreach (epoch; 0..epochs)
     {
         auto loss = value(0);
@@ -106,15 +107,15 @@ unittest
             loss = loss + (yhat[0] - target[0]);
 
             // accuracy
-            accuracy += yhat[0].data.round == target[i].data;
+            accuracy += (yhat[0].data > 0.5) == target[i].data;
         }
-        // writeln("params l0: ", layer0.parameterValues);
-        // writeln("params g0: ", layer0.parameterGrads);
-        // writeln;
-        // writeln("params l1: ", layer1.parameterValues);
-        // writeln("params g1: ", layer1.parameterGrads);
-        // writeln;
-        // writeln;
+        writeln("params l0: ", layer0.parameterValues);
+        writeln("params g0: ", layer0.parameterGrads);
+        writeln;
+        writeln("params l1: ", layer1.parameterValues);
+        writeln("params g1: ", layer1.parameterGrads);
+        writeln;
+        writeln;
         loss = loss / input.length;
         accuracy /= input.length;
         

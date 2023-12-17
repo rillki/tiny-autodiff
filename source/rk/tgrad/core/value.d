@@ -193,6 +193,16 @@ class Value : INeuron
         return result;
     }
 
+    auto opOpAssign(string op)(Value rhs)
+    {
+        mixin("return this" ~ op ~ "rhs;");
+    }
+
+    auto opOpAssign(string op)(in ElementType rhs)
+    {
+        mixin("return this" ~ op ~ "rhs;");
+    }
+
     auto buildNodeList(Value startNode)
     {
         import std.algorithm : canFind;
@@ -273,8 +283,13 @@ unittest
     assert(b.grad == 0);
     assert(a.grad == 0);
 
-    // test parameters property
+    // test parameters property returns by reference
     g.parameters[0].grad = 2;
     assert(g.grad == 2);
+
+    // test opOpAssign
+    g = value(0);
+    g += value(3);
+    assert(g.data == 3);
 }
 
