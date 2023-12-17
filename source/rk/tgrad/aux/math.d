@@ -8,7 +8,7 @@ import std.algorithm : clamp;
 
 enum EPSILON = 1.19209290e-7;
 
-Value vlog(Value x)
+Value log(Value x)
 {
     return value(log(x.data.clamp(EPSILON, 1 - EPSILON)), [x], (result) {
         auto _x = result.parents[0];

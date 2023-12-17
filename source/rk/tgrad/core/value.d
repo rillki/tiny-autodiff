@@ -11,6 +11,12 @@ interface INeuron
         foreach (ref p; parameters.parallel) p.grad = 0;
     }
 
+    final void update(in ElementType lr)
+    {
+        import std.parallelism : parallel;
+        foreach (ref p; parameters.parallel) p.data -= lr * p.grad;
+    }
+
     Value[] parameters();
     ElementType[] parameterValues();
     ElementType[] parameterGrads();
@@ -71,9 +77,9 @@ class Value : INeuron
     }
 
     void backward() 
-    {
+    {import std.parallelism : parallel;
         this.grad = 1;
-        foreach (node; buildNodeList(this)) node._backward(node);
+        foreach (node; buildNodeList(this).parallel) node._backward(node);
     }
 
     Value[] parameters()
