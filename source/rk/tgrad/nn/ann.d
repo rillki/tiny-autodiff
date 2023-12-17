@@ -10,12 +10,15 @@ class ANN : INeuron
     Layer[] layers;
     size_t[] shape;
 
-    this(in size_t[] shape)
-    {
+    this(
+        in size_t[] shape, 
+        Value function(Value) activateHidden = &activateSigmoid, 
+        Value function(Value) activateOutput = &activateLinear
+    ) {
         this.shape = shape.dup;
         foreach (i; 1..shape.length) layers ~= new Layer(
             [shape[i-1], shape[i]], 
-            i+1 != shape.length ? &activateSigmoid : &activateLinear
+            i+1 != shape.length ? activateHidden : activateOutput
         );
     }
 
@@ -166,12 +169,12 @@ unittest
     ].map!(x => x.value).array;
 
     // define model
-    auto model = new ANN([2, 16, 16, 1]);
-    assert(model.shape == [2, 16, 16, 1]);
-    assert(model.parameterValues.length == 337);
+    enum mshape = [2, 4, 2, 1];
+    auto model = new ANN(mshape, &activateSigmoid, &activateLinear);
+    assert(model.shape == mshape);
 
     // define cost
-    auto cost(Value[] preds, in ElementType lr)
+    auto cost(Value[] preds, in ElementType alpha = 1e-4)
     {
         import std.typecons : tuple;
         import std.algorithm : reduce, sum;
@@ -179,10 +182,10 @@ unittest
         // svm "max-margin" loss
         Value[] losses; 
         foreach (i; 0..preds.length) losses ~= (1 - target[i]*preds[i]).activateRelu;
-        auto dataLoss = losses.reduce!((a, b) => a + b);
+        auto dataLoss = losses.reduce!((a, b) => a + b) / preds.length;
 
         // L2 regularization
-        auto regLoss = lr * sum(model.parameterValues);
+        auto regLoss = alpha * model.parameterValues.map!(a => a*a).array.sum;
         auto totalLoss = dataLoss + regLoss;
 
         // accuracy
@@ -193,16 +196,16 @@ unittest
     }
 
     // train
-    enum lr = 0.05;
-    enum epochs = 100;
+    enum lr = 0.005;
+    enum epochs = 1000;
     foreach (epoch; 0..epochs)
     {
         // forward
         Value[] preds;
-        foreach (x; input[0..10]) preds ~= model.forward(x);
+        foreach (x; input) preds ~= model.forward(x);
 
         // loss
-        auto ret = cost(preds[0..10], lr);
+        auto ret = cost(preds);
         auto loss = ret[0];
         auto accuracy = ret[1];
         
@@ -213,7 +216,12 @@ unittest
         // update
         model.update(lr);
 
-        if (epoch % 10 == 0) writefln("epoch %3s loss %.4f accuracy %.2f", epoch, loss.data, accuracy);
+        if (epoch % 1 == 0) writefln("epoch %3s loss %.4f accuracy %.2f", epoch, loss.data, accuracy);
+        writeln("params v: ", model.parameterValues);
+        writeln("params g: ", model.parameterGrads);
+        writeln("preds  v: ", preds.map!(a => a.data).array);
+        writeln;
+        writeln;
     }
 
 }

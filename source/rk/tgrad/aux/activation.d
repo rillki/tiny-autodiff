@@ -10,7 +10,7 @@ Value activateLinear(Value x)
 {
     return value(x.data, [x], (result) {
         auto _x = result.parents[0];
-        _x.grad += 1;
+        _x.grad += 1 * result.grad;
     });
 }
 
