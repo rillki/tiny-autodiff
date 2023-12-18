@@ -45,6 +45,8 @@ class Neuron : INeuron
 
 unittest
 {
+    import std.stdio;
+
     // define model
     auto neuron = new Neuron(2);
 
@@ -60,8 +62,8 @@ unittest
     ];
 
     // train
-    enum lr = 0.01;
-    enum epochs = 120;
+    enum lr = 0.05;
+    enum epochs = 100;
     foreach (epoch; 0..epochs)
     {
         auto loss = value(0);
@@ -72,7 +74,7 @@ unittest
             auto yhat = neuron.forward(x);
 
             // loss and accuracy
-            loss = loss + (yhat - target[i]);
+            loss = loss + (yhat - target[i]) * (yhat - target[i]);
             accuracy += (yhat.data > 0.5) == target[i].data;
         }
         loss = loss / input.length;
@@ -83,7 +85,9 @@ unittest
         loss.backward();
 
         // update
-        neuron.update(lr * loss.data);
+        neuron.update(lr);
+
+        // if (epoch % 10 == 0) writefln("epoch %3s loss %.4f accuracy %.4f", epoch, loss.data, accuracy);
     }
 
     // predict

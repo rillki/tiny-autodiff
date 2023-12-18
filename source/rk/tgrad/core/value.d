@@ -48,20 +48,21 @@ template value(T = ElementType) if (isNumeric!T)
 class Value : INeuron
 {
     ElementType data;
-    ElementType grad = 0;
+    ElementType grad;
     Value[] parents = null;
     void function(Value) _backward = (x){};
 
     this() 
     {
         import std.random : uniform;
-        this.data = uniform!("[]", ElementType, ElementType)(0, 1);
+        this.data = uniform!("()", ElementType, ElementType)(-1, 1);
         this.grad = 0;
     }
 
     this(in ElementType data) 
     {
         this.data = data;
+        this.grad = 0;
     }
 
     this(in ElementType data, Value[] parents) 
@@ -77,7 +78,9 @@ class Value : INeuron
     }
 
     void backward() 
-    {import std.parallelism : parallel;
+    {
+        import std.parallelism : parallel;
+        
         this.grad = 1;
         foreach (node; buildNodeList(this).parallel) node._backward(node);
     }
@@ -199,16 +202,6 @@ class Value : INeuron
         return result;
     }
 
-    auto opOpAssign(string op)(Value rhs)
-    {
-        mixin("return this" ~ op ~ "rhs;");
-    }
-
-    auto opOpAssign(string op)(in ElementType rhs)
-    {
-        mixin("return this" ~ op ~ "rhs;");
-    }
-
     auto buildNodeList(Value startNode)
     {
         import std.algorithm : canFind;
@@ -292,10 +285,5 @@ unittest
     // test parameters property returns by reference
     g.parameters[0].grad = 2;
     assert(g.grad == 2);
-
-    // test opOpAssign
-    g = value(0);
-    g += value(3);
-    assert(g.data == 3);
 }
 

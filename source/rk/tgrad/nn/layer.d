@@ -52,8 +52,7 @@ unittest
     import std.stdio : writefln, writeln;
 
     // define layer
-    auto layer0 = new Layer([4, 2], &activateSigmoid);
-    auto layer1 = new Layer([2, 1], &activateSigmoid);
+    auto layer = new Layer([4, 1], &activateLinear);
 
     // define data
     auto input = [  // binary
@@ -79,7 +78,7 @@ unittest
     ].map!(x => x.value).array;
 
     // train
-    enum lr = 0.05;
+    enum lr = 0.0005;
     enum epochs = 100;
     foreach (epoch; 0..epochs)
     {
@@ -88,44 +87,33 @@ unittest
         foreach (i, x; input)
         {
             // forward
-            auto out0 = layer0.forward(x);
-            auto yhat = layer1.forward(out0);
+            auto yhat = layer.forward(x)[0];
 
             // loss
-            loss = loss + (yhat[0] - target[0]);
+            loss = loss + (yhat - target[i]) * (yhat - target[i]);
 
             // accuracy
-            accuracy += (yhat[0].data > 0.5) == target[i].data;
+            accuracy += (yhat.data > 0.5) == target[i].data;
         }
-        // writeln("params l0: ", layer0.parameterValues);
-        // writeln("params g0: ", layer0.parameterGrads);
-        // writeln;
-        // writeln("params l1: ", layer1.parameterValues);
-        // writeln("params g1: ", layer1.parameterGrads);
-        // writeln;
-        // writeln;
         loss = loss / input.length;
         accuracy /= input.length;
         
         // backward
-        layer0.zeroGrad();
-        layer1.zeroGrad();
+        layer.zeroGrad();
         loss.backward();
 
         // update
-        layer1.update(lr * loss.data);
-        layer0.update(lr * loss.data);
+        layer.update(lr);
 
-        // if (epoch % 10 == 0) writefln("epoch %s loss %s accuracy %s", epoch, loss.data, accuracy);
+        // if (epoch % 10 == 0) writefln("epoch %3s loss %.4f accuracy %.4f", epoch, loss.data, accuracy);
     }
 
     // predict
-    auto out0 = layer0.forward(input[0]);
-    auto pred = layer1.forward(out0);
-    assert(pred[0].data > 0.5);
+    auto pred = layer.forward(input[0])[0];
+    assert(pred.data > 0.5);
 
     // test parameters property
-    layer1.parameters[0].grad = 2;
-    assert(layer1.neurons[0].params[0].grad == 2);
+    layer.parameters[0].grad = 2;
+    assert(layer.neurons[0].params[0].grad == 2);
 }
 
