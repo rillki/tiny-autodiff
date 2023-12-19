@@ -86,7 +86,7 @@ unittest
         import std.typecons : tuple;
         import std.algorithm : reduce;
 
-        // mae loss
+        // mse loss
         Value[] losses; 
         foreach (i; 0..preds.length) losses ~= (preds[i] - target[i]) * (preds[i] - target[i]);
         auto data_loss = losses.reduce!((a, b) => a + b) / preds.length;
