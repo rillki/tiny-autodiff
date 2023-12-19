@@ -57,23 +57,24 @@ unittest
 
     // define data
     auto input = [  // binary
-        [0, 0, 0, 0].map!(x => x.value).array, // 0
-        [0, 0, 0, 1].map!(x => x.value).array, // 1
-        [0, 0, 1, 0].map!(x => x.value).array, // 2
-        [0, 0, 1, 1].map!(x => x.value).array, // 3
-        [0, 1, 0, 0].map!(x => x.value).array, // 4
-        [0, 1, 0, 1].map!(x => x.value).array, // 5
-        [0, 1, 1, 0].map!(x => x.value).array, // 6
-        [0, 1, 1, 1].map!(x => x.value).array, // 7
-        [1, 0, 0, 0].map!(x => x.value).array, // 8
-        [1, 0, 0, 1].map!(x => x.value).array, // 9
-        [1, 0, 1, 0].map!(x => x.value).array, // 10
-        [1, 0, 1, 1].map!(x => x.value).array, // 11
-        [1, 1, 0, 0].map!(x => x.value).array, // 12
-        [1, 1, 0, 1].map!(x => x.value).array, // 13
-        [1, 1, 1, 0].map!(x => x.value).array, // 14
-        [1, 1, 1, 1].map!(x => x.value).array, // 15
-    ];
+        [0, 0, 0, 0], // 0
+        [0, 0, 0, 1], // 1
+        [0, 0, 1, 0], // 2
+        [0, 0, 1, 1], // 3
+        [0, 1, 0, 0], // 4
+        [0, 1, 0, 1], // 5
+        [0, 1, 1, 0], // 6
+        [0, 1, 1, 1], // 7
+        [1, 0, 0, 0], // 8
+        [1, 0, 0, 1], // 9
+        [1, 0, 1, 0], // 10
+        [1, 0, 1, 1], // 11
+        [1, 1, 0, 0], // 12
+        [1, 1, 0, 1], // 13
+        [1, 1, 1, 0], // 14
+        [1, 1, 1, 1], // 15
+    ].map!(x => x.map!(y => y.value).array).array;
+    
     auto target = [ // 1: even, 0: odd
         1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0
     ].map!(x => x.value).array;
@@ -119,7 +120,7 @@ unittest
         // update
         model.update(lr);
 
-        // if (epoch % 10 == 0) writefln("epoch %3s loss %.4f accuracy %.2f", epoch, loss.data, accuracy);
+        if (epoch % 10 == 0) writefln("epoch %3s loss %.4f accuracy %.2f", epoch, loss.data, accuracy);
     }
 
     // predict
