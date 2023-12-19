@@ -38,7 +38,7 @@ import std.array : array;
 import std.algorithm : map;
 
 // define data
-auto input = [  // binary
+auto input = [    // binary
     [0, 0, 0, 0], // 0
     [0, 0, 0, 1], // 1
     [0, 0, 1, 0], // 2
