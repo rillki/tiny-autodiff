@@ -202,6 +202,39 @@ class Value : INeuron
         return result;
     }
 
+    void opInto(string op)(Value rhs, Value lhs)
+    {
+        this.data = mixin("rhs.data" ~ op ~ "lhs.data");
+        this.parents = [rhs, lhs];
+
+        // set backward function
+        static if (op == "+" || op == "-")
+        {
+            this._backward = (x) {
+                // get lhs, rhs
+                auto lhs = x.parents[0];
+                auto rhs = x.parents[1];
+
+                // perform backward operation
+                lhs.grad += 1.0 * x.grad;
+                rhs.grad += 1.0 * x.grad;
+            };
+        }
+        else static if (op == "*" || op == "/")
+        {
+            this._backward = (x) {
+                // get lhs, rhs
+                auto lhs = x.parents[0];
+                auto rhs = x.parents[1];
+
+                // perform backward operation
+                lhs.grad += rhs.data * x.grad;
+                rhs.grad += lhs.data * x.grad;
+            };
+        }
+        else static assert(0, "Operator <"~op~"> not supported!");
+    }
+
     auto buildNodeList(Value startNode)
     {
         import std.algorithm : canFind;
@@ -285,5 +318,15 @@ unittest
     // test parameters property returns by reference
     g.parameters[0].grad = 2;
     assert(g.grad == 2);
+
+    // check inplace operation
+    auto h = value(0);
+    h.opInto!"*"(a, b);
+    a.zeroGrad();
+    b.zeroGrad();
+    h.backward();
+    assert(h.data == -6);
+    assert(b.data == -3);
+    assert(a.data == 2);
 }
 
