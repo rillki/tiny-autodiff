@@ -211,7 +211,7 @@ class Value : INeuron
     }
 
     /// inplace operations
-    void opInto(string op)(Value rhs, Value lhs)
+    void opInplace(string op)(Value rhs, Value lhs)
     {
         this.data = mixin("rhs.data" ~ op ~ "lhs.data");
         this.parents = [rhs, lhs];
@@ -340,7 +340,7 @@ unittest
 
     // check inplace operation
     auto h = value(0);
-    h.opInto!"*"(a, b);
+    h.opInplace!"*"(a, b);
     a.zeroGrad();
     b.zeroGrad();
     h.backward();
