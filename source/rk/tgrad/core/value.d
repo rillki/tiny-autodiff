@@ -52,6 +52,7 @@ class Value : INeuron
     Value[] parents = null;
     void function(Value) _backward = (x){};
 
+    /// init
     this() 
     {
         import std.random : uniform;
@@ -59,24 +60,28 @@ class Value : INeuron
         this.grad = 0;
     }
 
+    /// ditto
     this(in ElementType data) 
     {
         this.data = data;
         this.grad = 0;
     }
 
+    /// ditto
     this(in ElementType data, Value[] parents) 
     {
         this(data);
         this.parents = parents;
     }
 
+    /// ditto
     this(in ElementType data, Value[] parents, void function(Value) backward) 
     {
         this(data, parents);
         this._backward = backward;
     }
 
+    /// backward operation 
     void backward() 
     {
         import std.parallelism : parallel;
@@ -85,16 +90,19 @@ class Value : INeuron
         foreach (node; buildNodeList(this).parallel) node._backward(node);
     }
 
+    /// returns model parameters object
     Value[] parameters()
     {
         return [this];
     }
 
+    /// returns model parameter values
     ElementType[] parameterValues()
     {
         return [data];
     }
 
+    /// returns model gradients values
     ElementType[] parameterGrads()
     {
         return [grad];
@@ -202,6 +210,7 @@ class Value : INeuron
         return result;
     }
 
+    /// inplace operations
     void opInto(string op)(Value rhs, Value lhs)
     {
         this.data = mixin("rhs.data" ~ op ~ "lhs.data");
@@ -234,7 +243,16 @@ class Value : INeuron
         }
         else static assert(0, "Operator <"~op~"> not supported!");
     }
+    
+    /// reinit object values
+    void reset(in ElementType data, Value[] parents, void function(Value) backward)
+    {
+        this.data = data;
+        this.parents = parents;
+        this._backward = backward;
+    }
 
+    /// build node tree of all Values
     auto buildNodeList(Value startNode)
     {
         import std.algorithm : canFind;
@@ -261,6 +279,7 @@ class Value : INeuron
 
 unittest
 {
+    // create
     auto a = value(2);
     auto b = value(-3);
     auto c = value(10);
