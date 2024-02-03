@@ -12,7 +12,7 @@ class Neuron : INeuron
     /// Initialize a new neuron with a custom activation function
     this(in size_t inputSize, Value function(Value) activate = &activateLinear) {
         this.activate = activate;
-        foreach (i; 0..inputSize+1) this.params ~= value();
+        foreach (i; 0 .. inputSize+1) this.params ~= value();
     }
 
     /// Forward operation
@@ -80,10 +80,14 @@ unittest
             // forward
             auto yhat = neuron.forward(x);
 
-            // loss and accuracy
+            // loss
             loss = loss + (yhat - target[i]) * (yhat - target[i]);
+
+            // accuracy
             accuracy += (yhat.data > 0.5) == target[i].data;
         }
+
+        // adjust by input size
         loss = loss / input.length;
         accuracy /= input.length;
         
@@ -95,7 +99,7 @@ unittest
         neuron.update(lr);
 
         // debug print
-        if (epoch % 10 == 0) writefln("epoch %3s loss %.4f accuracy %.4f", epoch, loss.data, accuracy);
+        // if (epoch % 10 == 0) writefln("epoch %3s loss %.4f accuracy %.4f", epoch, loss.data, accuracy);
     }
 
     // predict
