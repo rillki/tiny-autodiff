@@ -24,22 +24,20 @@ interface INeuron
 
 template value(T = ElementType) if (isNumeric!T)
 {
+    /// Initialize with a uniform random distribution [0; 1)
     auto value()
     {
         return new Value();
     }
 
+    /// Initialize with a custom variable
     auto value(in T data)
     {
         return new Value(data);
     }
 
-    auto value(in T data, Value[] parents)
-    {
-        return new Value(data, parents);
-    }
-
-    auto value(in T data, Value[] parents, void function(Value) backward)
+    /// Initialize with custom parameters
+    auto value(in T data, Value[] parents, void function(Value) backward = null)
     {
         return new Value(data, parents, backward);
     }
@@ -47,212 +45,120 @@ template value(T = ElementType) if (isNumeric!T)
 
 class Value : INeuron
 {
-    ElementType data;
-    ElementType grad;
+    ElementType data = 0;
+    ElementType grad = 0;
     Value[] parents = null;
-    void function(Value) _backward = (x){};
+    void function(Value) _backward = null;
 
-    /// init
+    /// Initialize with a uniform random distribution [0; 1)
     this() 
     {
         import std.random : uniform;
-        this.data = uniform!("()", ElementType, ElementType)(-1, 1);
-        this.grad = 0;
+        this.data = uniform!("[)", ElementType, ElementType)(0, 1);
     }
 
-    /// ditto
+    /// Initialize with a custom variable
     this(in ElementType data) 
     {
         this.data = data;
-        this.grad = 0;
     }
 
-    /// ditto
-    this(in ElementType data, Value[] parents) 
+    /// Initialize with custom parameters
+    this(in ElementType data, Value[] parents, void function(Value) backward = null) 
     {
         this(data);
         this.parents = parents;
-    }
-
-    /// ditto
-    this(in ElementType data, Value[] parents, void function(Value) backward) 
-    {
-        this(data, parents);
         this._backward = backward;
     }
 
     /// backward operation 
     void backward() 
-    {
-        import std.parallelism : parallel;
-        
+    {        
         this.grad = 1;
-        foreach (node; buildNodeList(this).parallel) node._backward(node);
+        foreach (node; buildNodeList(this)) if (node._backward) node._backward(node);
     }
 
-    /// returns model parameters object
+    /// Returns model parameters as Value object
     Value[] parameters()
     {
         return [this];
     }
 
-    /// returns model parameter values
+    /// Returns model parameter values
     ElementType[] parameterValues()
     {
         return [data];
     }
 
-    /// returns model gradients values
+    /// Returns model gradients values
     ElementType[] parameterGrads()
     {
         return [grad];
     }
 
-    auto opBinary(string op)(Value rhs)
+    auto opBinary(string op)(Value rhs) 
     {
-        auto result = value(mixin("this.data" ~ op ~ "rhs.data"), [this, rhs]);
-
-        // set backward function
         static if (op == "+" || op == "-")
         {
-            result._backward = (x) {
-                // get lhs, rhs
-                auto lhs = x.parents[0];
-                auto rhs = x.parents[1];
-
-                // perform backward operation
-                lhs.grad += 1.0 * x.grad;
-                rhs.grad += 1.0 * x.grad;
-            };
+            return value(mixin("this.data" ~ op ~ "rhs.data"), [this, rhs], &opBackwardAddSub);
         }
         else static if (op == "*" || op == "/")
         {
-            result._backward = (x) {
-                // get lhs, rhs
-                auto lhs = x.parents[0];
-                auto rhs = x.parents[1];
-
-                // perform backward operation
-                lhs.grad += rhs.data * x.grad;
-                rhs.grad += lhs.data * x.grad;
-            };
+            return value(mixin("this.data" ~ op ~ "rhs.data"), [this, rhs], &opBackwardMulDiv);
         }
         else static assert(0, "Operator <"~op~"> not supported!");
-
-        return result;
     }
 
     auto opBinary(string op)(in ElementType rhs)
     {
-        auto result = value(mixin("this.data" ~ op ~ "rhs"), [this, value(rhs)]);
-
-        // set backward function
         static if (op == "+" || op == "-")
         {
-            result._backward = (x) {
-                // get lhs, rhs
-                auto lhs = x.parents[0];
-                auto rhs = x.parents[1];
-
-                // perform backward operation
-                lhs.grad += 1.0 * x.grad;
-                rhs.grad += 1.0 * x.grad;
-            };
+            return value(mixin("this.data" ~ op ~ "rhs"), [this, value(rhs)], &opBackwardAddSub);
         }
         else static if (op == "*" || op == "/")
         {
-            result._backward = (x) {
-                // get lhs, rhs
-                auto lhs = x.parents[0];
-                auto rhs = x.parents[1];
-
-                // perform backward operation
-                lhs.grad += rhs.data * x.grad;
-                rhs.grad += lhs.data * x.grad;
-            };
+            return value(mixin("this.data" ~ op ~ "rhs"), [this, value(rhs)], &opBackwardMulDiv);
         }
         else static assert(0, "Operator <"~op~"> not supported!");
-
-        return result;
     }
 
     auto opBinaryRight(string op)(in ElementType lhs)
     {
-        auto result = value(mixin("this.data" ~ op ~ "lhs"), [this, value(lhs)]);
-
-        // set backward function
         static if (op == "+" || op == "-")
         {
-            result._backward = (x) {
-                // get lhs, rhs
-                auto lhs = x.parents[0];
-                auto rhs = x.parents[1];
-
-                // perform backward operation
-                lhs.grad += 1.0 * x.grad;
-                rhs.grad += 1.0 * x.grad;
-            };
+            return value(mixin("lhs" ~ op ~ "this.data"), [value(lhs), this], &opBackwardAddSub);
         }
         else static if (op == "*" || op == "/")
         {
-            result._backward = (x) {
-                // get lhs, rhs
-                auto lhs = x.parents[0];
-                auto rhs = x.parents[1];
-
-                // perform backward operation
-                lhs.grad += rhs.data * x.grad;
-                rhs.grad += lhs.data * x.grad;
-            };
+            return value(mixin("lhs" ~ op ~ "this.data"), [value(lhs), this], &opBackwardMulDiv);
         }
         else static assert(0, "Operator <"~op~"> not supported!");
-
-        return result;
     }
 
-    /// inplace operations
-    void opInplace(string op)(Value rhs, Value lhs)
+    /// Inplace operations
+    void opInplace(string op)(Value lhs, Value rhs)
     {
-        this.data = mixin("rhs.data" ~ op ~ "lhs.data");
-        this.parents = [rhs, lhs];
-
-        // set backward function
         static if (op == "+" || op == "-")
         {
-            this._backward = (x) {
-                // get lhs, rhs
-                auto lhs = x.parents[0];
-                auto rhs = x.parents[1];
-
-                // perform backward operation
-                lhs.grad += 1.0 * x.grad;
-                rhs.grad += 1.0 * x.grad;
-            };
+            this.reinit(mixin("rhs.data" ~ op ~ "lhs.data"), [lhs, rhs], &opBackwardAddSub);
         }
         else static if (op == "*" || op == "/")
         {
-            this._backward = (x) {
-                // get lhs, rhs
-                auto lhs = x.parents[0];
-                auto rhs = x.parents[1];
-
-                // perform backward operation
-                lhs.grad += rhs.data * x.grad;
-                rhs.grad += lhs.data * x.grad;
-            };
+            this.reinit(mixin("rhs.data" ~ op ~ "lhs.data"), [lhs, rhs], &opBackwardMulDiv);
         }
         else static assert(0, "Operator <"~op~"> not supported!");
     }
     
-    /// reinit object values
-    void reset(in ElementType data, Value[] parents, void function(Value) backward)
+    /// Re-initialize object parameters
+    void reinit(in ElementType data, Value[] parents = null, void function(Value) backward = (x){})
     {
+        this.grad = 0;
         this.data = data;
         this.parents = parents;
         this._backward = backward;
     }
 
-    /// build node tree of all Values
+    /// Build node tree of all Values
     auto buildNodeList(Value startNode)
     {
         import std.algorithm : canFind;
@@ -275,6 +181,30 @@ class Value : INeuron
 
         return nodeList;
     }
+}
+
+/// Backward operation for addition and substraction
+private void opBackwardAddSub(Value opResult)
+{
+    // get parents
+    auto lhs = opResult.parents[0];
+    auto rhs = opResult.parents[1];
+
+    // perform backward operation
+    lhs.grad += 1.0 * opResult.grad;
+    rhs.grad += 1.0 * opResult.grad;
+}
+
+/// Backward operation for multiplication and division
+private void opBackwardMulDiv(Value opResult)
+{
+    // get parents
+    auto lhs = opResult.parents[0];
+    auto rhs = opResult.parents[1];
+
+    // perform backward operation
+    lhs.grad += rhs.data * opResult.grad;
+    rhs.grad += lhs.data * opResult.grad;
 }
 
 unittest
