@@ -5,8 +5,8 @@ import rk.tgrad;
 
 void main()
 {   
-    import std.stdio;
     import std.array : array;
+    import std.stdio : writeln;
     import std.algorithm : map;
 
     // define data
