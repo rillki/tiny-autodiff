@@ -10,7 +10,7 @@ class Layer : INeuron
     Neuron[] neurons;
     Value function(Value) activate;
 
-    /// Initialize a new neuron with a custom activation function
+    /// Initialize a new layer with a custom activation function
     this(in size_t[2] inOutSize, Value function(Value) activate = &activateLinear)
     {
         this.activate = activate;
