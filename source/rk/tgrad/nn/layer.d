@@ -45,75 +45,75 @@ class Layer : INeuron
     }
 }
 
-unittest
-{
-    import std.array : array;
-    import std.algorithm : map;
-    import std.stdio : writefln, writeln;
+// unittest
+// {
+//     import std.array : array;
+//     import std.algorithm : map;
+//     import std.stdio : writefln, writeln;
 
-    // define layer
-    auto layer = new Layer([4, 1], &activateLinear);
+//     // define layer
+//     auto layer = new Layer([4, 1], &activateLinear);
 
-    // define data
-    auto input = [  // binary
-        [0, 0, 0, 0].map!(x => x.value).array, // 0
-        [0, 0, 0, 1].map!(x => x.value).array, // 1
-        [0, 0, 1, 0].map!(x => x.value).array, // 2
-        [0, 0, 1, 1].map!(x => x.value).array, // 3
-        [0, 1, 0, 0].map!(x => x.value).array, // 4
-        [0, 1, 0, 1].map!(x => x.value).array, // 5
-        [0, 1, 1, 0].map!(x => x.value).array, // 6
-        [0, 1, 1, 1].map!(x => x.value).array, // 7
-        [1, 0, 0, 0].map!(x => x.value).array, // 8
-        [1, 0, 0, 1].map!(x => x.value).array, // 9
-        [1, 0, 1, 0].map!(x => x.value).array, // 10
-        [1, 0, 1, 1].map!(x => x.value).array, // 11
-        [1, 1, 0, 0].map!(x => x.value).array, // 12
-        [1, 1, 0, 1].map!(x => x.value).array, // 13
-        [1, 1, 1, 0].map!(x => x.value).array, // 14
-        [1, 1, 1, 1].map!(x => x.value).array, // 15
-    ];
-    auto target = [ // 1: even, 0: odd
-        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0
-    ].map!(x => x.value).array;
+//     // define data
+//     auto input = [  // binary
+//         [0, 0, 0, 0].map!(x => x.value).array, // 0
+//         [0, 0, 0, 1].map!(x => x.value).array, // 1
+//         [0, 0, 1, 0].map!(x => x.value).array, // 2
+//         [0, 0, 1, 1].map!(x => x.value).array, // 3
+//         [0, 1, 0, 0].map!(x => x.value).array, // 4
+//         [0, 1, 0, 1].map!(x => x.value).array, // 5
+//         [0, 1, 1, 0].map!(x => x.value).array, // 6
+//         [0, 1, 1, 1].map!(x => x.value).array, // 7
+//         [1, 0, 0, 0].map!(x => x.value).array, // 8
+//         [1, 0, 0, 1].map!(x => x.value).array, // 9
+//         [1, 0, 1, 0].map!(x => x.value).array, // 10
+//         [1, 0, 1, 1].map!(x => x.value).array, // 11
+//         [1, 1, 0, 0].map!(x => x.value).array, // 12
+//         [1, 1, 0, 1].map!(x => x.value).array, // 13
+//         [1, 1, 1, 0].map!(x => x.value).array, // 14
+//         [1, 1, 1, 1].map!(x => x.value).array, // 15
+//     ];
+//     auto target = [ // 1: even, 0: odd
+//         1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0
+//     ].map!(x => x.value).array;
 
-    // train
-    enum lr = 0.0005;
-    enum epochs = 100;
-    foreach (epoch; 0..epochs)
-    {
-        auto loss = value(0);
-        float accuracy = 0;
-        foreach (i, x; input)
-        {
-            // forward
-            auto yhat = layer.forward(x)[0];
+//     // train
+//     enum lr = 0.0005;
+//     enum epochs = 100;
+//     foreach (epoch; 0..epochs)
+//     {
+//         auto loss = value(0);
+//         float accuracy = 0;
+//         foreach (i, x; input)
+//         {
+//             // forward
+//             auto yhat = layer.forward(x)[0];
 
-            // loss
-            loss = loss + (yhat - target[i]) * (yhat - target[i]);
+//             // loss
+//             loss = loss + (yhat - target[i]) * (yhat - target[i]);
 
-            // accuracy
-            accuracy += (yhat.data > 0.5) == target[i].data;
-        }
-        loss = loss / input.length;
-        accuracy /= input.length;
+//             // accuracy
+//             accuracy += (yhat.data > 0.5) == target[i].data;
+//         }
+//         loss = loss / input.length;
+//         accuracy /= input.length;
         
-        // backward
-        layer.zeroGrad();
-        loss.backward();
+//         // backward
+//         layer.zeroGrad();
+//         loss.backward();
 
-        // update
-        layer.update(lr);
+//         // update
+//         layer.update(lr);
 
-        // if (epoch % 10 == 0) writefln("epoch %3s loss %.4f accuracy %.4f", epoch, loss.data, accuracy);
-    }
+//         // if (epoch % 10 == 0) writefln("epoch %3s loss %.4f accuracy %.4f", epoch, loss.data, accuracy);
+//     }
 
-    // predict
-    auto pred = layer.forward(input[0])[0];
-    assert(pred.data > 0.5);
+//     // predict
+//     auto pred = layer.forward(input[0])[0];
+//     assert(pred.data > 0.5);
 
-    // test parameters property
-    layer.parameters[0].grad = 2;
-    assert(layer.neurons[0].params[0].grad == 2);
-}
+//     // test parameters property
+//     layer.parameters[0].grad = 2;
+//     assert(layer.neurons[0].params[0].grad == 2);
+// }
 

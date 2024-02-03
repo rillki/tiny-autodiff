@@ -9,23 +9,30 @@ class Neuron : INeuron
     Value[] params;
     Value function(Value) activate;
 
+    /// Initialize a new neuron with a custom activation function
     this(in size_t inputSize, Value function(Value) activate = &activateLinear) {
-        foreach (i; 0..inputSize+1) this.params ~= value();
         this.activate = activate;
+        foreach (i; 0..inputSize+1) this.params ~= value();
     }
 
+    /// Forward operation
     Value forward(Value[] input) in (input.length+1 == parameters.length)
     {
         auto sum = value(0);
-        foreach (i, x; input) sum = sum + params[i]*x;
-        return activate(sum + params[$-1]);
+
+        // multiply weights with input: w[i] * x[i]
+        foreach (i; 0 .. input.length) sum = sum + params[i]*input[i];
+
+        // add bias
+        sum = sum + params[$-1];
+
+        // activate
+        return this.activate ? this.activate(sum) : sum;
     }
 
     Value[] parameters()
     {
-        Value[] paramsList;
-        foreach (p; this.params) paramsList ~= p.parameters;
-        return paramsList;
+        return params;
     }
 
     ElementType[] parameterValues()
@@ -45,12 +52,12 @@ class Neuron : INeuron
 
 unittest
 {
-    import std.stdio;
+    import std.stdio; 
 
     // define model
     auto neuron = new Neuron(2);
 
-    // define data
+    // define data: AND operator
     auto input = [
         [value(0), value(0)],
         [value(1), value(0)],
@@ -58,7 +65,7 @@ unittest
         [value(1), value(1)],
     ];
     auto target = [
-        0.value, 1.value, 1.value, 1.value
+        0.value, 0.value, 0.value, 1.value
     ];
 
     // train
@@ -87,7 +94,8 @@ unittest
         // update
         neuron.update(lr);
 
-        // if (epoch % 10 == 0) writefln("epoch %3s loss %.4f accuracy %.4f", epoch, loss.data, accuracy);
+        // debug print
+        if (epoch % 10 == 0) writefln("epoch %3s loss %.4f accuracy %.4f", epoch, loss.data, accuracy);
     }
 
     // predict
