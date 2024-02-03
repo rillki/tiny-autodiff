@@ -43,7 +43,7 @@ void main()
     // define loss function
     auto lossL2(Value[] preds)
     {
-        import std.algorithm : reduce, sum;
+        import std.algorithm : reduce;
 
         // voldemort type
         struct L2Loss { Value loss; float accuracy; }
@@ -52,7 +52,6 @@ void main()
         Value[] losses; 
         foreach (i; 0..preds.length) losses ~= (preds[i] - target[i]) * (preds[i] - target[i]);
         auto dataLoss = losses.reduce!((a, b) => a + b) / preds.length;
-        // auto dataLoss = sum(losses) / preds.length;
 
         // accuracy
         float accuracy = 0.0;

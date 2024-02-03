@@ -9,7 +9,7 @@ dub add tiny-autodiff
 ```
 
 ## Example usage
-### Variable
+### Value
 
 ```d
 import rk.tautodiff;
@@ -87,7 +87,6 @@ auto lossL2(Value[] preds)
     Value[] losses; 
     foreach (i; 0..preds.length) losses ~= (preds[i] - target[i]) * (preds[i] - target[i]);
     auto dataLoss = losses.reduce!((a, b) => a + b) / preds.length;
-    // auto dataLoss = sum(losses) / preds.length;
 
     // accuracy
     float accuracy = 0.0;
