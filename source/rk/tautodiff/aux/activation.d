@@ -1,7 +1,7 @@
-module rk.tgrad.aux.activation;
+module rk.tautodiff.aux.activation;
 
-import rk.tgrad.core.common;
-import rk.tgrad.core.value;
+import rk.tautodiff.core.common;
+import rk.tautodiff.core.value;
 
 import std.math : exp, tanh;
 import std.algorithm : min, max;

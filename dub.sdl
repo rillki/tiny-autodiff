@@ -1,5 +1,5 @@
 // DMD v2.105.3
-name "tiny-grad"
+name "tiny-autodiff"
 description "A tiny autograd library."
 authors "rillki"
 copyright "Copyright © 2023, rillki"

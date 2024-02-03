@@ -1,9 +1,9 @@
-module rk.tgrad.nn.layer;
+module rk.tautodiff.nn.layer;
 
-import rk.tgrad.core.common;
-import rk.tgrad.core.value;
-import rk.tgrad.nn.neuron;
-import rk.tgrad.aux.activation;
+import rk.tautodiff.core.common;
+import rk.tautodiff.core.value;
+import rk.tautodiff.nn.neuron;
+import rk.tautodiff.aux.activation;
 
 class Layer : INeuron
 {

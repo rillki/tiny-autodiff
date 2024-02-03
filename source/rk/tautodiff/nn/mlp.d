@@ -1,9 +1,9 @@
-module rk.tgrad.nn.mlp;
+module rk.tautodiff.nn.mlp;
 
-import rk.tgrad.core.common;
-import rk.tgrad.core.value;
-import rk.tgrad.nn.layer;
-import rk.tgrad.aux.activation;
+import rk.tautodiff.core.common;
+import rk.tautodiff.core.value;
+import rk.tautodiff.nn.layer;
+import rk.tautodiff.aux.activation;
 
 class MLP : INeuron
 {

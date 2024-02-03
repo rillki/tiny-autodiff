@@ -1,6 +1,6 @@
-module rk.tgrad.core.value;
+module rk.tautodiff.core.value;
 
-import rk.tgrad.core.common;
+import rk.tautodiff.core.common;
 import std.traits: isNumeric;
 
 interface INeuron

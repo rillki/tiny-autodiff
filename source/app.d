@@ -1,7 +1,7 @@
 module app;
 
 import std.stdio;
-import rk.tgrad;
+import rk.tautodiff;
 
 void main()
 {   

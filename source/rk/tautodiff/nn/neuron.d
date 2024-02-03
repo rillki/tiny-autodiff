@@ -1,8 +1,8 @@
-module rk.tgrad.nn.neuron;
+module rk.tautodiff.nn.neuron;
 
-import rk.tgrad.core.common;
-import rk.tgrad.core.value;
-import rk.tgrad.aux.activation;
+import rk.tautodiff.core.common;
+import rk.tautodiff.core.value;
+import rk.tautodiff.aux.activation;
 
 class Neuron : INeuron
 {
