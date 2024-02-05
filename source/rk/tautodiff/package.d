@@ -6,4 +6,5 @@ public import rk.tautodiff.nn.neuron;
 public import rk.tautodiff.nn.layer;
 public import rk.tautodiff.nn.mlp;
 public import rk.tautodiff.aux.activation;
+public import rk.tautodiff.aux.chainsolver;
 
