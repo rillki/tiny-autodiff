@@ -3,6 +3,7 @@ module rk.tautodiff.nn.neuron;
 import rk.tautodiff.core.common;
 import rk.tautodiff.core.value;
 import rk.tautodiff.aux.activation;
+import rk.tautodiff.aux.chainsolver;
 
 class Neuron : INeuron
 {
@@ -18,6 +19,7 @@ class Neuron : INeuron
     /// Forward operation
     Value forward(Value[] input) in (input.length+1 == parameters.length)
     {
+        // setup
         auto sum = value(0);
 
         // multiply weights with input: w[i] * x[i]
@@ -55,7 +57,7 @@ unittest
     import std.stdio; 
 
     // define model
-    auto neuron = new Neuron(2);
+    auto neuron = new Neuron(2, &activateSigmoid);
 
     // define data: AND operator
     auto input = [

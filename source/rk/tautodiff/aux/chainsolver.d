@@ -20,7 +20,8 @@ struct ChainSolver
     /// Reset operations
     void reset() 
     {
-        step = 0;
+        step = 1;
+        this.lastResult().zeroGrad();
     }
 
     /// Returns last result of calculation
@@ -34,26 +35,26 @@ struct ChainSolver
         static if (op == "+" || op == "-")
         {
             if (step < values.length) values[step].reinit(
-                mixin("this.values[$-1].data" ~ op ~ "rhs.data"), 
-                [this.values[$-1], rhs], 
+                mixin("this.lastResult.data" ~ op ~ "rhs.data"), 
+                [this.lastResult, rhs], 
                 &opBackwardAddSub
             );
             else values ~= value(
-                mixin("this.values[$-1].data" ~ op ~ "rhs.data"), 
-                [this.values[$-1], rhs], 
+                mixin("this.lastResult.data" ~ op ~ "rhs.data"), 
+                [this.lastResult, rhs], 
                 &opBackwardAddSub
             );
         }
         else static if (op == "*" || op == "/")
         {
             if (step < values.length) values[step].reinit(
-                mixin("this.values[$-1].data" ~ op ~ "rhs.data"), 
-                [this.values[$-1], rhs], 
+                mixin("this.lastResult.data" ~ op ~ "rhs.data"), 
+                [this.lastResult, rhs], 
                 &opBackwardMulDiv
             );
             else values ~= value(
-                mixin("this.values[$-1].data" ~ op ~ "rhs.data"), 
-                [this.values[$-1], rhs], 
+                mixin("this.lastResult.data" ~ op ~ "rhs.data"), 
+                [this.lastResult, rhs], 
                 &opBackwardMulDiv
             );
         }
@@ -89,9 +90,6 @@ unittest
     solver -= 2; // 5 - 2 = 3
     solver *= 2; // 3 * 2 = 6
     solver /= 3; // 6 / 3 = 2
-
-    solver.values.writeln();
-    solver.writeln();
     assert(solver.data == 2);
     assert(solver.grad == 0);
 
@@ -115,6 +113,20 @@ unittest
 
     solver ~= 245.value;
     assert(solver.data == 245);
+
+    /*
+        RESET:
+    */
+
+    solver.reset();
+    assert(solver.data == 0);
+    assert(solver.grad == 0);
+
+    solver += 5;
+    solver *= 2;
+    solver -= 9;
+    assert(solver.data == 1);
+    assert(solver.grad == 0);
 }
 
 
