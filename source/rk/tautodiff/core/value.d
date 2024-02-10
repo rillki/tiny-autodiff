@@ -122,6 +122,12 @@ class Value : INeuron
         else static assert(0, "Operator <"~op~"> not supported!");
     }
 
+    override string toString() const @safe pure
+    {
+        import std.string : format;
+        return "Value(data=%s, grad=%s)".format(this.data, this.grad);
+    }
+
     auto opBinaryRight(string op)(in ElementType lhs)
     {
         static if (op == "+" || op == "-")
@@ -184,7 +190,7 @@ class Value : INeuron
 }
 
 /// Backward operation for addition and substraction
-private void opBackwardAddSub(Value opResult)
+void opBackwardAddSub(Value opResult)
 {
     // get parents
     auto lhs = opResult.parents[0];
@@ -196,7 +202,7 @@ private void opBackwardAddSub(Value opResult)
 }
 
 /// Backward operation for multiplication and division
-private void opBackwardMulDiv(Value opResult)
+void opBackwardMulDiv(Value opResult)
 {
     // get parents
     auto lhs = opResult.parents[0];
