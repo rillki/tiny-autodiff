@@ -113,6 +113,7 @@ unittest
 
     solver ~= 245.value;
     assert(solver.data == 245);
+    assert(solver.values.length == 8);
 
     /*
         RESET:
@@ -127,6 +128,7 @@ unittest
     solver -= 9;
     assert(solver.data == 1);
     assert(solver.grad == 0);
+    assert(solver.values.length == 8);
 }
 
 
