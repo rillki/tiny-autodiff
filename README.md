@@ -78,7 +78,7 @@ while (true)
 import rk.tautodiff;
 
 import std.array : array;
-import std.stdio : writeln;
+import std.stdio : writefln;
 import std.algorithm : map;
 
 // define data
@@ -115,7 +115,7 @@ auto model = new MLP([4, 8, 1], &activateRelu, &activateSigmoid);
 // define loss function
 auto lossL2(Value[] preds)
 {
-    import std.algorithm : reduce, sum;
+    import std.algorithm : reduce;
 
     // voldemort type
     struct L2Loss { Value loss; float accuracy; }
