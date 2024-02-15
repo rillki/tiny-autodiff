@@ -174,6 +174,13 @@ epoch  30 loss 0.0395 accuracy 1.00
 epoch  90 loss 0.0010 accuracy 1.00
 ```
 
+## References
+* [Golem **(D)**](https://github.com/lempiji/golem)
+* [Grain **(D)**](https://github.com/ShigekiKarita/grain)
+* [Micrograd **(Py)**](https://github.com/karpathy/micrograd)
+* [Teenygrad **(Py)**](https://github.com/tinygrad/teenygrad)
+* [Tinygrad **(Py)**](https://github.com/tinygrad/tinygrad)
+
 ## LICENSE
 All code is licensed under the BSL license. 
 
