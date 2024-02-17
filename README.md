@@ -8,6 +8,20 @@ Add library to your project using DUB:
 dub add tiny-autodiff
 ```
 
+## Precision
+Use the `versions` configuration to specify the precision:
+* `TGRAD_USE_FLOAT`
+* `TGRAD_USE_DOUBLE`
+* `TGRAD_USE_REAL`
+```
+// dub.sdl
+versions "TGRAD_USE_FLOAT"
+```
+```
+// dub.json
+versions: ["TGRAD_USE_FLOAT"]
+```
+
 ## Example usage
 ### Value
 
