@@ -39,12 +39,19 @@ template value(T = ElementType) if (isNumeric!T)
     /// Initialize with custom parameters
     auto value(in T data, Value[] parents, void function(Value) backward = null)
     {
-        return new Value(data, parents, backward);
+        return new Value(data, 0, parents, backward);
+    }
+
+    /// Initialize with custom parameters
+    auto value(in T data, in char op, Value[] parents, void function(Value) backward = null)
+    {
+        return new Value(data, op, parents, backward);
     }
 }
 
 class Value : INeuron
 {
+    char op;
     ElementType data = 0;
     ElementType grad = 0;
     Value[] parents = null;
@@ -64,18 +71,36 @@ class Value : INeuron
     }
 
     /// Initialize with custom parameters
-    this(in ElementType data, Value[] parents, void function(Value) backward = null) 
+    this(in ElementType data, in char op, Value[] parents, void function(Value) backward = null) 
     {
         this(data);
+        this.op = op;
         this.parents = parents;
         this._backward = backward;
     }
 
     /// backward operation 
-    void backward() 
-    {        
+    void backward()
+    {
         this.grad = 1;
         foreach (node; buildNodeList(this)) if (node._backward) node._backward(node);
+    }
+
+    /// Update variable value from cached `op` and `parents` information
+    void update() {
+        if (this.parents[0] && this.parents[1])
+        {
+            auto lhs = this.parents[0];
+            auto rhs = this.parents[1];
+            switch (this.op)
+            {
+                case '+': this.opInplace!"+"(lhs, rhs); break;
+                case '-': this.opInplace!"-"(lhs, rhs); break;
+                case '*': this.opInplace!"*"(lhs, rhs); break;
+                case '/': this.opInplace!"/"(lhs, rhs); break;
+                default: break;
+            }
+        }
     }
 
     /// Returns model parameters as Value object
@@ -100,11 +125,11 @@ class Value : INeuron
     {
         static if (op == "+" || op == "-")
         {
-            return value(mixin("this.data" ~ op ~ "rhs.data"), [this, rhs], &opBackwardAddSub);
+            return value(mixin("this.data" ~ op ~ "rhs.data"), op[0], [this, rhs], &opBackwardAddSub);
         }
         else static if (op == "*" || op == "/")
         {
-            return value(mixin("this.data" ~ op ~ "rhs.data"), [this, rhs], &opBackwardMulDiv);
+            return value(mixin("this.data" ~ op ~ "rhs.data"), op[0], [this, rhs], &opBackwardMulDiv);
         }
         else static assert(0, "Operator <"~op~"> not supported!");
     }
@@ -113,11 +138,11 @@ class Value : INeuron
     {
         static if (op == "+" || op == "-")
         {
-            return value(mixin("this.data" ~ op ~ "rhs"), [this, value(rhs)], &opBackwardAddSub);
+            return value(mixin("this.data" ~ op ~ "rhs"), op[0], [this, value(rhs)], &opBackwardAddSub);
         }
         else static if (op == "*" || op == "/")
         {
-            return value(mixin("this.data" ~ op ~ "rhs"), [this, value(rhs)], &opBackwardMulDiv);
+            return value(mixin("this.data" ~ op ~ "rhs"), op[0], [this, value(rhs)], &opBackwardMulDiv);
         }
         else static assert(0, "Operator <"~op~"> not supported!");
     }
@@ -125,18 +150,18 @@ class Value : INeuron
     override string toString() const @safe pure
     {
         import std.string : format;
-        return "Value(data=%s, grad=%s)".format(this.data, this.grad);
+        return "Value(data=%s, grad=%s, op=%s)".format(this.data, this.grad, this.op);
     }
 
     auto opBinaryRight(string op)(in ElementType lhs)
     {
         static if (op == "+" || op == "-")
         {
-            return value(mixin("lhs" ~ op ~ "this.data"), [value(lhs), this], &opBackwardAddSub);
+            return value(mixin("lhs" ~ op ~ "this.data"), op[0], [value(lhs), this], &opBackwardAddSub);
         }
         else static if (op == "*" || op == "/")
         {
-            return value(mixin("lhs" ~ op ~ "this.data"), [value(lhs), this], &opBackwardMulDiv);
+            return value(mixin("lhs" ~ op ~ "this.data"), op[0], [value(lhs), this], &opBackwardMulDiv);
         }
         else static assert(0, "Operator <"~op~"> not supported!");
     }
@@ -146,18 +171,19 @@ class Value : INeuron
     {
         static if (op == "+" || op == "-")
         {
-            this.reinit(mixin("rhs.data" ~ op ~ "lhs.data"), [lhs, rhs], &opBackwardAddSub);
+            this.reinit(mixin("rhs.data" ~ op ~ "lhs.data"), op[0], [lhs, rhs], &opBackwardAddSub);
         }
         else static if (op == "*" || op == "/")
         {
-            this.reinit(mixin("rhs.data" ~ op ~ "lhs.data"), [lhs, rhs], &opBackwardMulDiv);
+            this.reinit(mixin("rhs.data" ~ op ~ "lhs.data"), op[0], [lhs, rhs], &opBackwardMulDiv);
         }
         else static assert(0, "Operator <"~op~"> not supported!");
     }
     
     /// Re-initialize object parameters
-    void reinit(in ElementType data, Value[] parents = null, void function(Value) backward = (x){})
+    void reinit(in ElementType data, in char op, Value[] parents = null, void function(Value) backward = (x){})
     {
+        this.op = op;
         this.grad = 0;
         this.data = data;
         this.parents = parents;

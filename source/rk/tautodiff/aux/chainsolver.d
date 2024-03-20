@@ -35,12 +35,14 @@ struct ChainSolver
         static if (op == "+" || op == "-")
         {
             if (step < values.length) values[step].reinit(
-                mixin("this.lastResult.data" ~ op ~ "rhs.data"), 
+                mixin("this.lastResult.data" ~ op ~ "rhs.data"),
+                op[0], 
                 [this.lastResult, rhs], 
                 &opBackwardAddSub
             );
             else values ~= value(
                 mixin("this.lastResult.data" ~ op ~ "rhs.data"), 
+                op[0],
                 [this.lastResult, rhs], 
                 &opBackwardAddSub
             );
@@ -48,12 +50,14 @@ struct ChainSolver
         else static if (op == "*" || op == "/")
         {
             if (step < values.length) values[step].reinit(
-                mixin("this.lastResult.data" ~ op ~ "rhs.data"), 
+                mixin("this.lastResult.data" ~ op ~ "rhs.data"),
+                op[0], 
                 [this.lastResult, rhs], 
                 &opBackwardMulDiv
             );
             else values ~= value(
                 mixin("this.lastResult.data" ~ op ~ "rhs.data"), 
+                op[0],
                 [this.lastResult, rhs], 
                 &opBackwardMulDiv
             );
