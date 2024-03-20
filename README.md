@@ -10,9 +10,9 @@ dub add tiny-autodiff
 
 ## Precision
 Use the `versions` configuration to specify the precision:
-* `TGRAD_USE_FLOAT`
-* `TGRAD_USE_DOUBLE`
-* `TGRAD_USE_REAL`
+* `TAUTODIFF_USE_FLOAT`
+* `TAUTODIFF_USE_DOUBLE`
+* `TAUTODIFF_USE_REAL`
 ```
 // dub.sdl
 versions "TGRAD_USE_FLOAT"
@@ -50,40 +50,36 @@ assert(a.grad == 6);
 ```
 
 ### ChainSolver
-ChainSolver caches allocated data and reuses it every time after `reset()` is called. It's meant to be used in loops.
+Use `ChainSolver` to solve equations step by step.
 ```d
 import rk.tautodiff;
 
 // create solver
 auto solver = ChainSolver(0); // 0 is initial value
 
-// loop
-while (true)
-{
-    // operations using the produced result 
-    solver += 5; // 0 + 5 = 5
-    solver *= 2; // 3 * 2 = 6
+// operations using the produced result 
+solver += 5; // 0 + 5 = 5
+solver *= 2; // 3 * 2 = 6
 
-    // append new value and work with it
-    solver ~= solver / value(2);
-    assert(solver.data == 3);
+// append new value and work with it
+solver ~= solver / value(2);
+assert(solver.data == 3);
 
-    // backward
-    solver.backward();
-    assert(solver.grad == 1);
+// backward
+solver.backward();
+assert(solver.grad == 1);
 
-    // zero grad
-    solver.zeroGrad();
-    assert(solver.grad == 0);
+// zero grad
+solver.zeroGrad();
+assert(solver.grad == 0);
 
-    // reset
-    solver.reset();
-    assert(solver.data == 0);
-    assert(solver.grad == 0);
+// reset
+solver.reset();
+assert(solver.data == 0);
+assert(solver.grad == 0);
 
-    // total length (allocated elements)
-    assert(solver.values.length == 4);
-}
+// total length (allocated elements)
+assert(solver.values.length == 4);
 ```
 
 ### Multi-layer perceptron

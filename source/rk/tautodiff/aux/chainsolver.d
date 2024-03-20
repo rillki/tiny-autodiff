@@ -3,7 +3,7 @@ module rk.tautodiff.aux.chainsolver;
 import rk.tautodiff.core.common;
 import rk.tautodiff.core.value;
 
-/// Reuse Values[] for iterative solves
+/// Solve equations
 struct ChainSolver
 {
     int step;
