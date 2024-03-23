@@ -88,7 +88,7 @@ class Value : INeuron
 
     /// Update variable value from cached `op` and `parents` information
     void update() {
-        if (this.parents[0] && this.parents[1])
+        if (this.parents.length == 2 && this.parents[0] && this.parents[1])
         {
             auto lhs = this.parents[0];
             auto rhs = this.parents[1];
@@ -171,11 +171,11 @@ class Value : INeuron
     {
         static if (op == "+" || op == "-")
         {
-            this.reinit(mixin("rhs.data" ~ op ~ "lhs.data"), op[0], [lhs, rhs], &opBackwardAddSub);
+            this.reinit(mixin("lhs.data" ~ op ~ "rhs.data"), op[0], [lhs, rhs], &opBackwardAddSub);
         }
         else static if (op == "*" || op == "/")
         {
-            this.reinit(mixin("rhs.data" ~ op ~ "lhs.data"), op[0], [lhs, rhs], &opBackwardMulDiv);
+            this.reinit(mixin("lhs.data" ~ op ~ "rhs.data"), op[0], [lhs, rhs], &opBackwardMulDiv);
         }
         else static assert(0, "Operator <"~op~"> not supported!");
     }
