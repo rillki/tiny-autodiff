@@ -3,7 +3,6 @@ module rk.tautodiff.nn.neuron;
 import rk.tautodiff.core.common;
 import rk.tautodiff.core.value;
 import rk.tautodiff.aux.activation;
-import rk.tautodiff.aux.chainsolver;
 
 class Neuron : INeuron
 {

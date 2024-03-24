@@ -15,11 +15,11 @@ Use the `versions` configuration to specify the precision:
 * `TAUTODIFF_USE_REAL`
 ```
 // dub.sdl
-versions "TGRAD_USE_FLOAT"
+versions "TAUTODIFF_USE_FLOAT"
 ```
 ```
 // dub.json
-versions: ["TGRAD_USE_FLOAT"]
+versions: ["TAUTODIFF_USE_FLOAT"]
 ```
 
 ## Example usage
@@ -80,6 +80,48 @@ assert(solver.grad == 0);
 
 // total length (allocated elements)
 assert(solver.values.length == 4);
+```
+
+### Tape
+Create `tapes` of equations and update the resulting value:
+```d
+// init
+auto tape = new Tape();
+assert(tape.values == []);
+assert(tape.values.length == 0);
+assert(tape.locked == false);
+assert(!tape.isLocked);
+
+// d = a * b - c
+auto a = 5.value;
+auto b = 10.value;
+auto c = 25.value;
+auto d = a * b;
+auto e = d - c;
+assert(e.data == 25);
+
+// push
+tape.pushBack(a);
+tape ~= b;
+tape ~= [c, d, e];
+assert(tape.values == [a, b, c, d, e]);
+assert(tape.values.length == 5);
+assert(tape.lastValue.data == 25);
+
+// lock tape
+tape.lock();
+// tape ~= 24.value; // assert error: reset the tape to push new values
+
+// modify value
+a.data = 6;
+
+// update tape
+tape.update();
+assert(tape.lastValue.data == 35);
+
+// reset tape to push new values
+tape.reset();
+tape ~= 35.value; // good
 ```
 
 ### Multi-layer perceptron

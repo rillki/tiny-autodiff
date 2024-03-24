@@ -16,7 +16,15 @@ class Tape
         locked = false;
     }
 
-    /// Retrive the last pushed value
+    /// Retreive the first pushed value
+    /// Returns: null if empty
+    Value firstValue() 
+    {
+        return values.length ? values[0] : null;
+    }
+
+    /// Retreive the last pushed value
+    /// Returns: null if empty
     Value lastValue()
     {
         return values.length ? values[$-1] : null;
@@ -44,25 +52,25 @@ class Tape
     }
 
     // Push back a single value
-    void pushBack(Value v) 
+    void pushBack(Value v) in (!isLocked, "Reset the tape to push new values.")
     {
         this.values ~= v;
     }
 
     /// Push back values
-    void pushBack(Value[] vs) 
+    void pushBack(Value[] vs) in (!isLocked, "Reset the tape to push new values.") 
     {
         this.values ~= vs;
     }
 
     /// Append a single value
-    void opOpAssign(string op: "~")(Value v)
+    void opOpAssign(string op: "~")(Value v) in (!isLocked, "Reset the tape to push new values.")
     {
         this.pushBack(v);
     }
 
     /// Append values
-    void opOpAssign(string op: "~")(Value[] vs)
+    void opOpAssign(string op: "~")(Value[] vs) in (!isLocked, "Reset the tape to push new values.")
     {
         this.pushBack(vs);
     }
