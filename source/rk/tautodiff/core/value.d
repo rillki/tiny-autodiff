@@ -61,7 +61,7 @@ class Value : INeuron
     this() 
     {
         import std.random : uniform;
-        this.data = uniform!("[)", ElementType, ElementType)(0, 1);
+        this.data = uniform!("()", ElementType, ElementType)(-1, 1);
     }
 
     /// Initialize with a custom variable

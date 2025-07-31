@@ -4,9 +4,9 @@ import std.stdio;
 import rk.tautodiff;
 
 void main()
-{   
+{
     import std.array : array;
-    import std.stdio : writeln;
+    import std.stdio : writeln, writefln;
     import std.algorithm : map;
 
     // define data
@@ -36,6 +36,8 @@ void main()
     // split train, test
     auto input_train = input[0 .. 12];
     auto input_test = input[12 .. $];
+    auto target_train = target[0 .. 12];
+    auto target_test = target[12 .. $];
 
     // define model
     auto model = new MLP([4, 8, 1], &activateRelu, &activateSigmoid);
@@ -50,12 +52,15 @@ void main()
 
         // mse loss
         Value[] losses; 
-        foreach (i; 0..preds.length) losses ~= (preds[i] - target[i]) * (preds[i] - target[i]);
-        auto dataLoss = losses.reduce!((a, b) => a + b) / preds.length;
+        foreach (i; 0..preds.length) 
+            losses ~= (preds[i] - target_train[i]) * (preds[i] - target_train[i]);
+        
+        auto sum = losses.reduce!((a, b) => a + b);
+        auto dataLoss = sum / preds.length;
 
         // accuracy
         float accuracy = 0.0;
-        foreach (i; 0..preds.length) accuracy += ((preds[i].data > 0.5) == target[i].data);
+        foreach (i; 0..preds.length) accuracy += ((preds[i].data > 0.5) == target_train[i].data);
         accuracy /= preds.length;
 
         // return voldemort type with cost and accuracy
@@ -63,7 +68,7 @@ void main()
     }
 
     // train
-    enum lr = 0.05;
+    enum lr = 0.5;
     enum epochs = 100;
     foreach (epoch; 0..epochs)
     {
@@ -89,7 +94,7 @@ void main()
     foreach (i, x; input_test) 
     {
         auto pred = model.forward(x)[0];
-        assert((pred.data > 0.5) == target[i].data);
+        assert((pred.data > 0.5) == target_test[i].data);
     }
 }
 

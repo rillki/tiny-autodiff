@@ -70,8 +70,8 @@ unittest
     ];
 
     // train
-    enum lr = 0.05;
-    enum epochs = 100;
+    enum lr = 0.01;
+    enum epochs = 1000;
     foreach (epoch; 0..epochs)
     {
         auto loss = value(0);
@@ -100,7 +100,7 @@ unittest
         neuron.update(lr);
 
         // debug print
-        // if (epoch % 10 == 0) writefln("epoch %3s loss %.4f accuracy %.4f", epoch, loss.data, accuracy);
+        if (epoch % 100 == 0) writefln("epoch %3s loss %.4f accuracy %.4f", epoch, loss.data, accuracy);
     }
 
     // predict
