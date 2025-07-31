@@ -9,6 +9,10 @@ void main()
     import std.stdio : writeln, writefln;
     import std.algorithm : map;
 
+    // print version
+    writeln("Using `tiny-autodiff` version: ", Version);
+    writeln("---");
+
     // define data
     auto input = [  // binary
         [0, 0, 0, 0], // 0

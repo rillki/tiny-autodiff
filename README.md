@@ -23,6 +23,14 @@ versions: ["TAUTODIFF_USE_FLOAT"]
 ```
 
 ## Example usage
+**Checking version:**
+```d
+import std.stdio;
+import rk.tautodiff;
+
+writeln("Using `tiny-autodiff` version: ", Version);
+```
+
 ### Value
 
 ```d
