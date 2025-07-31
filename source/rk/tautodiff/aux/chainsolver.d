@@ -32,34 +32,64 @@ struct ChainSolver
 
     void opOpAssign(string op)(Value rhs) 
     {
-        static if (op == "+" || op == "-")
+        static if (op == "+")
         {
             if (step < values.length) values[step].reinit(
                 mixin("this.lastResult.data" ~ op ~ "rhs.data"),
                 op[0], 
                 [this.lastResult, rhs], 
-                &opBackwardAddSub
+                &opBackwardAdd
             );
             else values ~= value(
                 mixin("this.lastResult.data" ~ op ~ "rhs.data"), 
                 op[0],
                 [this.lastResult, rhs], 
-                &opBackwardAddSub
+                &opBackwardAdd
             );
         }
-        else static if (op == "*" || op == "/")
+        else static if (op == "-")
         {
             if (step < values.length) values[step].reinit(
                 mixin("this.lastResult.data" ~ op ~ "rhs.data"),
                 op[0], 
                 [this.lastResult, rhs], 
-                &opBackwardMulDiv
+                &opBackwardSub
             );
             else values ~= value(
                 mixin("this.lastResult.data" ~ op ~ "rhs.data"), 
                 op[0],
                 [this.lastResult, rhs], 
-                &opBackwardMulDiv
+                &opBackwardSub
+            );
+        }
+        else static if (op == "*")
+        {
+            if (step < values.length) values[step].reinit(
+                mixin("this.lastResult.data" ~ op ~ "rhs.data"),
+                op[0], 
+                [this.lastResult, rhs], 
+                &opBackwardMul
+            );
+            else values ~= value(
+                mixin("this.lastResult.data" ~ op ~ "rhs.data"), 
+                op[0],
+                [this.lastResult, rhs], 
+                &opBackwardMul
+            );
+        }
+        else static if (op == "/")
+        {
+            if (step < values.length) values[step].reinit(
+                mixin("this.lastResult.data" ~ op ~ "rhs.data"),
+                op[0], 
+                [this.lastResult, rhs], 
+                &opBackwardDiv
+            );
+            else values ~= value(
+                mixin("this.lastResult.data" ~ op ~ "rhs.data"), 
+                op[0],
+                [this.lastResult, rhs], 
+                &opBackwardDiv
             );
         }
         else static if (op == "~")
