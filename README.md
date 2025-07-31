@@ -1,6 +1,6 @@
 <img src="imgs/icon-tautodiff.png" width="95" height="52" align="left"></img>
 # Tiny AutoDiff
-A tiny autograd library. Implements backpropagation autodiff. It supports all you need to build small neural networks.
+A tiny autograd library. Implements backpropagation autodiff. It supports all you need to build small neural networks. 
 
 ## Library
 Add library to your project using DUB:
